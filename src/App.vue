@@ -1,42 +1,46 @@
 <template>
-  <div class="app-container" :class="{ 'dark-theme': isDark }">
-    <nav class="floating-nav glass">
-      <div class="nav-inner">
+  <div class="app-wrapper">
+    <nav class="glass floating-nav">
+      <div class="nav-container">
         <div class="logo" @click="currentView = 'list'">
-          FUTURE<span>STATION</span>
+          FUTURE<span>.</span>SHOP
         </div>
-        
-        <div class="nav-actions">
-          <button class="icon-btn" @click="toggleDark">
-            <BulbFilled v-if="isDark" style="color: #fbbf24" />
-            <BulbOutlined v-else />
+
+        <div class="nav-right">
+          <button class="icon-btn theme-toggle" @click="toggleDark">
+            <transition name="scale" mode="out-in">
+              <BulbFilled v-if="isDark" :key="'dark'" style="color: #fbbf24" />
+              <BulbOutlined v-else :key="'light'" />
+            </transition>
           </button>
 
-          <div id="cart-target" class="cart-trigger" @click="currentView = 'checkout'">
-            <a-badge :count="cartStore.totalCount" :offset="[-2, 2]">
-              <ShoppingOutlined class="nav-icon" />
+          <div id="cart-target" class="cart-anchor" @click="currentView = 'checkout'">
+            <a-badge :count="cartStore.totalCount" :offset="[-2, 2]" color="#6366f1">
+              <ShoppingOutlined class="cart-icon" />
             </a-badge>
           </div>
+
+          <a-avatar src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="user-avatar" />
         </div>
       </div>
     </nav>
 
     <main class="main-content">
-      <transition name="page-fade" mode="out-in">
+      <transition name="view-slide" mode="out-in">
         <div :key="currentView">
           
-          <div v-if="currentView === 'list'" class="product-grid-view">
-            <header class="hero-section">
+          <div v-if="currentView === 'list'" class="fade-in">
+            <header class="hero">
               <h1>The New Standard</h1>
-              <p>Khám phá bộ sưu tập công nghệ tương lai.</p>
+              <p>Khám phá bộ sưu tập công nghệ tối giản cho tương lai.</p>
             </header>
             
-            <a-row :gutter="[24, 24]">
+            <a-row :gutter="[20, 20]">
               <a-col :xs="12" :sm="12" :md="8" :lg="6" v-for="p in products" :key="p.id">
                 <ProductCard 
                   :item="p" 
-                  @add="handleFlyEffect" 
-                  @click="showDetail(p)"
+                  @add="animateToCart" 
+                  @click="openDetail(p)"
                 />
               </a-col>
             </a-row>
@@ -63,18 +67,32 @@
       </transition>
     </main>
 
-    <div v-if="ghostItem" class="ghost-flyer" :style="ghostStyle">
-      <img :src="ghostItem.img" />
+    <transition name="fade">
+      <div v-if="flyingGhost" class="flying-ghost" :style="ghostStyle">
+        <img :src="flyingGhost.img" />
+      </div>
+    </transition>
+
+    <div class="mobile-bottom-nav glass" v-if="isMobile">
+      <div class="tab" @click="currentView = 'list'" :class="{active: currentView === 'list'}">
+        <HomeOutlined />
+      </div>
+      <div class="tab" @click="currentView = 'checkout'" :class="{active: currentView === 'checkout'}">
+        <ShoppingOutlined />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
-import { ShoppingOutlined, BulbOutlined, BulbFilled } from '@ant-design/icons-vue';
+import { ref, reactive, onMounted } from 'vue';
+import { 
+  ShoppingOutlined, BulbOutlined, BulbFilled, 
+  HomeOutlined 
+} from '@ant-design/icons-vue';
 import { useCartStore } from './stores/cart';
 
-// Import các components đã hoàn thiện
+// Components
 import ProductCard from './components/ProductCard.vue';
 import ProductDetail from './components/ProductDetail.vue';
 import CheckoutView from './components/CheckoutView.vue';
@@ -82,181 +100,141 @@ import SuccessView from './components/SuccessView.vue';
 
 const cartStore = useCartStore();
 const currentView = ref('list');
-const isDark = ref(false);
+const isDark = ref(localStorage.getItem('theme') === 'dark');
 const selectedProduct = ref(null);
+const isMobile = ref(window.innerWidth <= 768);
 
-// Dữ liệu mẫu
+// Dữ liệu mẫu hoàn chỉnh
 const products = [
-  { id: 1, name: 'Vision Pro G2', price: 85000000, img: 'https://picsum.photos/600/600?random=1', category: 'Smart VR' },
-  { id: 2, name: 'Sonic Pro Max', price: 12500000, img: 'https://picsum.photos/600/600?random=2', category: 'Audio' },
-  { id: 3, name: 'Cyber Mouse 3', price: 3200000, img: 'https://picsum.photos/600/600?random=3', category: 'Gaming' },
-  { id: 4, name: 'Neo Mechanical', price: 5800000, img: 'https://picsum.photos/600/600?random=4', category: 'Keyboard' },
+  { id: 1, name: 'Vision Pro G2', price: 85000000, img: 'https://picsum.photos/600/600?r=10', category: 'Wearable' },
+  { id: 2, name: 'Studio Display', price: 45000000, img: 'https://picsum.photos/600/600?r=21', category: 'Display' },
+  { id: 3, name: 'Keychron K2', price: 2500000, img: 'https://picsum.photos/600/600?r=32', category: 'Gear' },
+  { id: 4, name: 'Magic Mouse', price: 2200000, img: 'https://picsum.photos/600/600?r=43', category: 'Gear' },
+  { id: 5, name: 'AirPods Max', price: 13500000, img: 'https://picsum.photos/600/600?r=54', category: 'Audio' },
+  { id: 6, name: 'iPad Pro M4', price: 28900000, img: 'https://picsum.photos/600/600?r=65', category: 'Tablet' },
 ];
 
-// Logic xử lý Dark Mode
 const toggleDark = () => {
   isDark.value = !isDark.value;
   document.body.classList.toggle('dark-theme', isDark.value);
+  localStorage.setItem('theme', isDark.value ? 'dark' : 'light');
 };
 
-// Logic chuyển sang trang chi tiết
-const showDetail = (product) => {
+const openDetail = (product) => {
   selectedProduct.value = product;
-  currentView.ref = 'detail';
+  currentView.value = 'detail';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-/** * Logic Hiệu ứng Bay (Khắc phục lỗi undefined bằng cách kiểm tra data)
- */
-const ghostItem = ref(null);
+// --- LOGIC HIỆU ỨNG BAY ---
+const flyingGhost = ref(null);
 const ghostStyle = reactive({});
 
-const handleFlyEffect = (payload) => {
-  // Kiểm tra an toàn để tránh lỗi "destructured parameter is undefined"
-  if (!payload || !payload.rect) return;
-
-  const { rect, img, product } = payload;
-  const target = document.getElementById('cart-target')?.getBoundingClientRect();
+const animateToCart = (data) => {
+  const { rect, img, product } = data;
+  const cartIcon = document.getElementById('cart-target')?.getBoundingClientRect();
   
-  if (!target) {
-    cartStore.addToCart(product);
-    return;
-  }
+  if (!cartIcon) return;
 
-  // Khởi tạo vị trí bắt đầu của ghost item
-  ghostItem.value = { img };
+  flyingGhost.value = { img };
   Object.assign(ghostStyle, {
     top: `${rect.top}px`,
     left: `${rect.left}px`,
     width: `${rect.width}px`,
-    height: `${rect.height}px`,
     opacity: 1,
     transition: 'none'
   });
 
-  // Chạy hiệu ứng chuyển động tới giỏ hàng
   setTimeout(() => {
     Object.assign(ghostStyle, {
-      top: `${target.top + 5}px`,
-      left: `${target.left + 5}px`,
+      top: `${cartIcon.top}px`,
+      left: `${cartIcon.left}px`,
       width: '20px',
-      height: '20px',
-      opacity: 0.2,
+      opacity: 0,
       transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
     });
   }, 50);
 
-  // Sau khi bay xong thì biến mất và thêm vào store
   setTimeout(() => {
-    ghostItem.value = null;
+    flyingGhost.value = null;
     cartStore.addToCart(product);
   }, 850);
 };
+
+onMounted(() => {
+  if (isDark.value) document.body.classList.add('dark-theme');
+});
 </script>
 
-<style>
-/* CSS Reset & App Layout */
-.app-container {
-  min-height: 100vh;
-  padding-top: 100px; /* Tránh bị che bởi nav */
-}
-
-/* Navbar Floating Style */
+<style scoped>
 .floating-nav {
   position: fixed;
-  top: 20px;
-  left: 50%;
+  top: 20px; left: 50%;
   transform: translateX(-50%);
-  width: 92%;
-  max-width: 1100px;
+  width: 90%;
+  max-width: 1200px;
   height: 70px;
   z-index: 1000;
+  border-radius: 35px;
+  padding: 0 30px;
   display: flex;
   align-items: center;
-  padding: 0 30px;
 }
 
-.nav-inner {
-  width: 100%;
+.nav-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
 }
 
-.logo {
-  font-size: 22px;
-  font-weight: 900;
-  letter-spacing: -1.5px;
-  cursor: pointer;
-}
-
+.logo { font-size: 20px; font-weight: 900; cursor: pointer; color: var(--text-main); }
 .logo span { color: var(--primary); }
 
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 25px;
-}
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.cart-icon { font-size: 24px; color: var(--text-main); }
+.icon-btn { background: none; border: none; cursor: pointer; display: flex; font-size: 22px; }
 
-.nav-icon {
-  font-size: 24px;
-  color: var(--text-main);
-}
+.hero { text-align: center; margin-bottom: 60px; }
+.hero h1 { font-size: clamp(32px, 6vw, 56px); margin: 0; }
 
-.icon-btn {
-  background: none;
-  border: none;
-  font-size: 22px;
-  cursor: pointer;
-  display: flex;
-}
-
-/* Content Area */
-.main-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.hero-section {
-  text-align: center;
-  margin-bottom: 50px;
-}
-
-.hero-section h1 {
-  font-size: 48px;
-  font-weight: 900;
-  margin: 0;
-}
-
-/* Ghost Animation */
-.ghost-flyer {
+/* Ghost Flyer */
+.flying-ghost {
   position: fixed;
   z-index: 9999;
   pointer-events: none;
-  border-radius: 15px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
+.flying-ghost img { width: 100%; height: 100%; object-fit: cover; }
 
-.ghost-flyer img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+/* Transitions */
+.view-slide-enter-active, .view-slide-leave-active { transition: all 0.4s ease; }
+.view-slide-enter-from { opacity: 0; transform: translateY(20px); }
+.view-slide-leave-to { opacity: 0; transform: translateY(-20px); }
+
+.scale-enter-active, .scale-leave-active { transition: all 0.3s ease; }
+.scale-enter-from, .scale-leave-to { transform: scale(0); opacity: 0; }
+
+/* Mobile Bottom Nav */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 60px;
+  border-radius: 30px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
 }
+.tab { font-size: 24px; color: var(--text-sub); cursor: pointer; }
+.tab.active { color: var(--primary); }
 
-/* Page Transitions */
-.page-fade-enter-active,
-.page-fade-leave-active {
-  transition: all 0.4s ease;
-}
-
-.page-fade-enter-from {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.page-fade-leave-to {
-  opacity: 0;
-  transform: translateY(-20px);
+@media (max-width: 768px) {
+  .floating-nav { top: 10px; padding: 0 20px; }
+  .logo { font-size: 16px; }
 }
 </style>

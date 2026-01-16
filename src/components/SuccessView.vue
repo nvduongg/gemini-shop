@@ -1,29 +1,30 @@
 <template>
   <div class="success-screen">
-    <div class="icon-wrap">
-      <CheckCircleFilled />
+    <div class="glass-box glass">
+      <div class="icon-check">
+        <CheckOutlined />
+      </div>
+      <h1>Đặt hàng thành công</h1>
+      <p>Cảm ơn bạn! Đơn hàng #GEM-2026 đã được hệ thống ghi nhận và đang chuẩn bị giao đến bạn.</p>
+      <a-button type="primary" size="large" @click="$emit('go-home')" class="home-btn">
+        Tiếp tục mua sắm
+      </a-button>
     </div>
-    <h1>Thank You for Choosing Us</h1>
-    <p>Your order #GEM-2026 has been successfully placed. We'll notify you when it's on the way.</p>
-    <a-button type="primary" size="large" @click="$emit('go-home')" class="back-home">
-      Continue Shopping
-    </a-button>
   </div>
 </template>
 
 <script setup>
-import { CheckCircleFilled } from '@ant-design/icons-vue';
+import { CheckOutlined } from '@ant-design/icons-vue';
+defineEmits(['go-home']);
 </script>
 
 <style scoped>
-.success-screen { text-align: center; padding: 60px 20px; max-width: 600px; margin: 0 auto; }
-.icon-wrap { font-size: 80px; color: #22c55e; margin-bottom: 24px; animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-h1 { font-size: 32px; font-weight: 800; color: var(--text-main); }
-p { font-size: 16px; color: var(--text-sub); margin-bottom: 40px; }
-.back-home { height: 50px; border-radius: 12px; padding: 0 40px; font-weight: 700; }
-
-@keyframes pop {
-  0% { transform: scale(0); }
-  100% { transform: scale(1); }
+.success-screen { display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
+.glass-box { padding: 60px 40px; border-radius: 40px; text-align: center; max-width: 500px; }
+.icon-check { 
+  width: 72px; height: 72px; background: #22c55e; color: white; 
+  border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+  font-size: 32px; margin: 0 auto 24px;
 }
+.home-btn { height: 52px; padding: 0 40px; border-radius: 14px; font-weight: 700; }
 </style>

@@ -1,31 +1,22 @@
-/* --- 1. FONTS & VARIABLES --- */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
 
 :root {
-  /* Light Mode Colors */
   --bg-app: #f8fafc;
-  --bg-card: rgba(255, 255, 255, 0.7);
+  --bg-card: rgba(255, 255, 255, 0.8);
   --text-main: #0f172a;
   --text-sub: #64748b;
   --primary: #6366f1;
-  --border: rgba(0, 0, 0, 0.05);
-  --glass-blur: blur(15px);
-  --nav-height: 74px;
+  --primary-hover: #4f46e5;
+  --border-color: rgba(0, 0, 0, 0.04);
+  --glass-blur: blur(12px);
 }
 
 body.dark-theme {
-  /* Dark Mode Colors */
   --bg-app: #020617;
-  --bg-card: rgba(15, 23, 42, 0.7);
-  --text-main: #f1f5f9;
+  --bg-card: rgba(30, 41, 59, 0.7);
+  --text-main: #f8fafc;
   --text-sub: #94a3b8;
-  --border: rgba(255, 255, 255, 0.08);
-}
-
-/* --- 2. GLOBAL RESET --- */
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent; /* Xóa highlight xanh khi chạm trên mobile */
+  --border-color: rgba(255, 255, 255, 0.06);
 }
 
 body {
@@ -33,101 +24,13 @@ body {
   font-family: 'Plus Jakarta Sans', sans-serif;
   background-color: var(--bg-app);
   color: var(--text-main);
-  transition: background-color 0.4s ease;
-  overflow-x: hidden;
-  /* Fix cho tai thỏ/nốt ruồi trên điện thoại */
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* --- 3. COMMON GLASS CLASS --- */
+/* Hiệu ứng kính mờ cho các khung hình */
 .glass {
   background: var(--bg-card);
   backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--border);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
-}
-
-/* --- 4. RESPONSIVE TYPOGRAPHY & SPACING --- */
-.main-content {
-  max-width: 1300px;
-  margin: 0 auto;
-  padding: 120px 24px 60px; /* Top padding để tránh Nav */
-  transition: padding 0.3s ease;
-}
-
-h1 {
-  font-size: clamp(28px, 5vw, 48px);
-  font-weight: 800;
-  letter-spacing: -1.5px;
-  margin-bottom: 8px;
-}
-
-p {
-  font-size: clamp(14px, 2vw, 16px);
-  color: var(--text-sub);
-}
-
-/* --- 5. ANT DESIGN CUSTOM OVERRIDES --- */
-/* Đồng bộ các thông báo của Ant Design với giao diện hòa hợp */
-.ant-message-notice-content {
-  background: var(--bg-card) !important;
-  backdrop-filter: var(--glass-blur) !important;
-  color: var(--text-main) !important;
-  border-radius: 16px !important;
-  border: 1px solid var(--border);
-  box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
-}
-
-.ant-badge-count {
-  box-shadow: 0 0 0 2px var(--bg-app) !important;
-}
-
-/* --- 6. MOBILE OPTIMIZATION (BREAKPOINTS) --- */
-@media (max-width: 768px) {
-  :root {
-    --nav-height: 64px;
-  }
-
-  .main-content {
-    padding: 100px 16px 40px;
-  }
-
-  /* Làm mượt các card trên điện thoại */
-  .product-card {
-    border-radius: 20px !important;
-  }
-
-  /* Nav thu nhỏ lại trên mobile */
-  .floating-nav {
-    width: 94% !important;
-    top: 12px !important;
-    height: var(--nav-height) !important;
-    padding: 0 16px !important;
-  }
-
-  /* Ẩn bớt text không cần thiết trên mobile */
-  .hero-section p {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-}
-
-/* 7. SCROLLBAR CUSTOM (Cho hiện đại) */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--bg-app);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--text-sub);
-  border-radius: 10px;
-  opacity: 0.5;
-}
-
-/* 8. FIX ZOOM ON IOS */
-input, textarea, select {
-  font-size: 16px !important; /* Ngăn iOS tự động zoom khi focus vào input */
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
 }
